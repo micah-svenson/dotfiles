@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =9
+let g:netrw_dirhist_9='/home/shared/Projects/rustlings'
+let g:netrw_dirhist_8='/home/micah/.config/nvim'
+let g:netrw_dirhist_7='/home/connor/Projects/usspacetraining/src/app/simulator/services/socket'
+let g:netrw_dirhist_6='/home/connor/Projects/usspacetraining'
+let g:netrw_dirhist_5='/home/connor/Projects/usspacetraining/src/app/simulator/services'
+let g:netrw_dirhist_4='/home/connor/Projects/usspacetraining/src/app/simulator'
+let g:netrw_dirhist_3='/home/connor/Projects/usspacetraining'
+let g:netrw_dirhist_2='/home/connor/Projects/usspacetraining/src/app/simulator/sim-home'
+let g:netrw_dirhist_1='/home/connor/Projects/usspacetraining'
+let g:netrw_dirhist_0='/home/connor/Projects/usspacetraining/src/app/simulator/services/data-store'

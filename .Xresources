@@ -1,0 +1,48 @@
+
+
+xft.dpi: 300
+
+! special
+*.fg:   #bfd9e0
+*.fg_dim:   #bfd9e1
+*.bg:   #070a0a
+*.cursorColor:  #bfd9e0
+
+! black
+*.color0:       #0e1213
+*.color8:       #b3b3b3
+
+! red
+*.color1:       #161c1d
+*.color9:       #5a42d8
+
+! green
+*.color2:       #252d2f
+*.color10:      #45922e
+
+! yellow
+*.color3:       #3b4649
+*.color11:      #529ead
+
+! blue
+*.color4:       #566569
+*.color12:      #7259ff
+
+! magenta
+*.color5:       #778a90
+*.color13:      #c2764d
+
+! cyan
+*.color6:       #9cb6bd
+*.color14:      #8c7ae2
+
+! white
+*.color7:       #d5e6ea
+*.color15:      #6fa0ac
+
+
+
+
+
+
+
