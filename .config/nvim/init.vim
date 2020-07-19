@@ -8,7 +8,6 @@ set expandtab
 set smartindent
 set number
 set relativenumber
-set nowrap
 set smartcase
 set noswapfile
 set nobackup
@@ -16,6 +15,7 @@ set undodir=~/.config/nvim/undodir
 set undofile
 set incsearch
 set clipboard=unnamedplus
+set textwidth=80
 set colorcolumn=120
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
