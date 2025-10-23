@@ -1,0 +1,33 @@
+// Place your key bindings in this file to override the defaults
+[
+  {
+    "key": "ctrl+/",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "ctrl+/",
+    "command": "-editor.action.commentLine",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+/",
+    "command": "workbench.action.terminal.toggleTerminal",
+    "when": "!terminalIsOpen"
+  },
+  {
+    "key": "ctrl+shift+/",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "terminalIsOpen"
+  },
+  {
+    "key": "ctrl+i",
+    "command": "composerMode.agent"
+  },
+  {
+    "key": "ctrl+shift+b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open in Edge",
+    "when": "resourceExtname == '.html'"
+  }
+]
+

@@ -1,45 +1,39 @@
-# Path to your oh-my-zsh installation
+# Note: Use `omz reload` to "source" changes to this file.
+
+# Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-# Theme
-ZSH_THEME="robbyrussell"
+# Note: aliases are set in  ~/.oh-my-zsh/custom/aliases.zsh
 
-# Plugins
-plugins=(
-    git
-    fzf
-    zsh-autosuggestions 
-    zsh-syntax-highlighting
-)
-# install zsh-autosuggestions: git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-# install zsh-syntax-highlighting:  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="candy" # set by `omz`
 
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git)
 
-# Oh My Zsh configuration
+# Setup omz.
 source $ZSH/oh-my-zsh.sh
 
-# Aliases
-alias ll="ls -la"
-alias la="ls -A"
-alias l="ls -CF"
-alias vim="nvim"
-alias vi="nvim"
-alias grep="rg"
-alias cat="bat"
+# Add ~/.local/bin/ to PATH
+source "$HOME/.local/bin/env"
 
 {{- if .is_macos }}
 # macOS specific aliases and settings
-alias brew-update="brew update && brew upgrade && brew cleanup"
-alias finder="open ."
-
-# Add Homebrew to PATH
-eval "$(/opt/homebrew/bin/brew shellenv)"
 {{- end }}
 
 {{- if .is_linux }}
 # Linux specific aliases and settings
-alias apt-update="sudo apt update && sudo apt upgrade"
-alias open="xdg-open"
+
+# Add tools to PATH
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+export PATH="$PATH:/home/micah/projects/git-filter-repo"
+export PATH="$PATH:/opt/apache-maven-3.9.9/bin"
+export PATH="$PATH:/home/micah/.local/share/lua-language-server/bin"
+export PATH="$PATH:/usr/local/go/bin"
 
 # Add local bin to PATH if it exists
 if [ -d "$HOME/.local/bin" ]; then
@@ -47,30 +41,15 @@ if [ -d "$HOME/.local/bin" ]; then
 fi
 {{- end }}
 
-# FZF configuration
-export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+## CUSTOM CONFIG ##
 
-# Environment variables
-export EDITOR="nvim"
-export VISUAL="nvim"
+# Setup Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-# Custom functions
-mkcd() {
-    mkdir -p "$1" && cd "$1"
-}
 
-# Git shortcuts
-alias gs="git status"
-alias ga="git add"
-alias gc="git commit"
-alias gp="git push"
-alias gl="git pull"
-alias gd="git diff"
-alias gb="git branch"
-alias gco="git checkout"
+# Language options
+export UV_PYTHON="/usr/bin/python3.12"
+export NODE_OPTIONS="--max-old-space-size=4096"
 
-# Load local zsh config if it exists
-if [ -f ~/.zshrc.local ]; then
-    source ~/.zshrc.local
-fi
