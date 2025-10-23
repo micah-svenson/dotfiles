@@ -1,0 +1,23 @@
+[data]
+{{- $osid := .chezmoi.os -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+osid = {{ $osid | quote }}
+hostname = {{ .chezmoi.hostname | quote }}
+username = {{ .chezmoi.username | quote }}
+
+{{- if eq .chezmoi.os "darwin" }}
+is_macos = true
+is_linux = false
+package_manager = "brew"
+{{- else if eq .chezmoi.os "linux" }}
+is_macos = false
+is_linux = true
+package_manager = "apt"
+{{- end }}
+
+[edit]
+command = "code"
+args = ["--wait"]

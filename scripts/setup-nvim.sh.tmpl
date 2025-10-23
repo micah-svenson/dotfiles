@@ -1,0 +1,48 @@
+#!/bin/bash
+set -euo pipefail
+
+# Neovim Configuration Setup Script
+# This script clones your Neovim config from your separate repository
+
+NVIM_CONFIG_REPO="https://github.com/micah-svenson/neovim-config.git"
+NVIM_CONFIG_DIR="$HOME/.config/nvim"
+
+echo "🚀 Setting up Neovim configuration..."
+
+# Source common functions
+source "$(dirname "$0")/../bootstrap/common.sh"
+
+# Backup existing nvim config if it exists
+if [ -d "$NVIM_CONFIG_DIR" ]; then
+    log_warning "Existing Neovim config found. Creating backup..."
+    backup_if_exists "$NVIM_CONFIG_DIR"
+fi
+
+# Ensure .config directory exists
+ensure_dir "$HOME/.config"
+
+# Clone or update the Neovim config repository
+log_info "Cloning Neovim configuration from: $NVIM_CONFIG_REPO"
+clone_or_update_repo "$NVIM_CONFIG_REPO" "$NVIM_CONFIG_DIR"
+
+# Check if Neovim is installed
+if ! command_exists nvim; then
+    log_error "Neovim is not installed. Please install it first:"
+    {{- if .is_macos }}
+    log_error "  brew install neovim"
+    {{- else if .is_linux }}
+    log_error "  See bootstrap/linux.sh for installation instructions"
+    {{- end }}
+    exit 1
+fi
+
+# Install Lazy.nvim if not already present
+LAZY_PATH="$HOME/.local/share/nvim/lazy/lazy.nvim"
+if [ ! -d "$LAZY_PATH" ]; then
+    log_info "Installing Lazy.nvim package manager..."
+    git clone --filter=blob:none https://github.com/folke/lazy.nvim.git --branch=stable "$LAZY_PATH"
+fi
+
+log_success "Neovim configuration setup complete!"
+log_info "Run 'nvim' to start Neovim and let Lazy.nvim install plugins."
+log_info "First startup may take a few minutes to download and compile plugins."
