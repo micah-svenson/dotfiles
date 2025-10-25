@@ -95,6 +95,78 @@
       "before": ["<leader>", "g", "g"],
       "commands": ["workbench.action.tasks.runTask"],
       "args": "lazygit"
+    },
+    {
+      "before": ["<leader>", "d", "a"],
+      "commands": ["workbench.action.debug.start"]
+    },
+    {
+      "before": ["<leader>", "d", "b"],
+      "commands": ["editor.debug.action.toggleBreakpoint"]
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.continue"]
+    },
+    {
+      "before": ["<leader>", "d", "i"],
+      "commands": ["workbench.action.debug.stepInto"]
+    },
+    {
+      "before": ["<leader>", "d", "l"],
+      "commands": ["testing.reRunLastRun"]
+    },
+    {
+      "before": ["<leader>", "d", "r"],
+      "commands": ["testing.toggleTestResultsPanel"]
+    },
+    {
+      "before": ["<leader>", "d", "t"],
+      "commands": ["workbench.action.debug.stop"]
+    },
+    {
+      "before": ["<leader>", "t", "a"],
+      "commands": ["testing.runAll"]
+    },
+    {
+      "before": ["<leader>", "t", "d"],
+      "commands": ["testing.debugAtCursor"]
+    },
+    {
+      "before": ["<leader>", "t", "l"],
+      "commands": ["testing.reRunLastRun"]
+    },
+    {
+      "before": ["<leader>", "t", "o"],
+      "commands": ["testing.showMostRecentOutput"]
+    },
+    {
+      "before": ["<leader>", "t", "O"],
+      "commands": ["testing.toggleTestResultsPanel"]
+    },
+    {
+      "before": ["<leader>", "t", "r"],
+      "commands": ["testing.runAtCursor"]
+    },
+    {
+      "before": ["<leader>", "t", "s"],
+      "commands": ["workbench.action.debug.stop"]
+    },
+    {
+      "before": ["<leader>", "t", "S"],
+      "commands": ["testing.toggleContinuousRun"]
+    },
+    {
+      "before": ["<leader>", "t", "t"],
+      "commands": ["testing.runCurrentFile"]
+    },
+    {
+      "before": ["<leader>", "t", "T"],
+      "commands": ["testing.debugCurrentFile"]
+    },
+    {
+      "before": ["<leader>", "t", "w"],
+      "commands": ["testing.toggleAutoRun"]
     }
   ],
   "diffEditor.ignoreTrimWhitespace": false,
@@ -125,6 +197,26 @@
     "searchAndCompare": true,
     "launchpad": false
   },
-  "explorer.confirmDragAndDrop": false
+  "explorer.confirmDragAndDrop": false,
+  "java.test.config": {
+    "name": "integration-tests",
+    "vmArgs": [
+      "-Djava.util.logging.manager=org.jboss.logmanager.LogManager",
+      "-Dquarkus.test.profile=com.bluestaq.IntegrationTestProfile",
+      "-DuseLocalConfiguration=true",
+      "-DconfigFilePath=config/",
+      "-DpropertyFile=udl-properties.yaml,test.udl-properties.yaml",
+      "-DdwProvider=mongo"
+    ],
+    "env": {
+      "MAVEN_HOME": "${env:MAVEN_HOME}"
+    },
+    "classPaths": ["${workspaceFolder}/src/test-integration/resources"],
+    "sourcePaths": ["${workspaceFolder}/src/test-integration/java"],
+    "workingDirectory": "${workspaceFolder}",
+    "testKind": "junit",
+    "filters": {
+      "include": ["**/*IT.java", "**/*IntegrationTest.java"]
+    }
+  }
 }
-
