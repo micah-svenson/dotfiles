@@ -4,35 +4,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a chezmoi-managed dotfiles repository for cross-platform development environment setup (macOS and Linux). It manages configuration files for developer tools and provides automated bootstrap scripts for setting up new machines.
+This is a chezmoi-managed dotfiles repository for cross-platform development environment setup (macOS, Linux, and WSL). It manages configuration files for developer tools and provides automated bootstrap scripts for setting up new machines.
 
 ## Repository Structure
 
 ```
 dotfiles/
-├── .chezmoi.toml.tmpl          # Chezmoi config with OS detection
-├── .shared/                    # Shared configurations (symlinked)
-│   └── vscode-cursor/         # VS Code & Cursor settings (used by both apps on both OSes)
-│       ├── settings.json.tmpl
-│       └── keybindings.json
-├── bootstrap/                  # Bootstrap scripts for initial setup
-│   ├── macos.sh               # macOS-specific setup
-│   ├── linux.sh               # Linux/Ubuntu setup
-│   └── common.sh              # Shared functions
-├── scripts/                    # Utility scripts
-│   ├── install-tools.sh.tmpl  # Development tools installation
-│   └── setup-nvim.sh.tmpl     # Neovim configuration setup
-├── dot_zshrc.tmpl             # Zsh configuration with OS templating
-├── dot_zshenv                 # Zsh environment variables
-├── dot_config/                # Linux app configurations (~/.config/)
-│   ├── Code/User/             # VS Code settings (symlinks to .shared/)
-│   └── Cursor/User/           # Cursor settings (symlinks to .shared/)
-├── private_Library/           # macOS app configurations (~/Library/)
+├── .chezmoi.toml.tmpl                    # Chezmoi config with OS/WSL detection
+├── .chezmoitemplates/                    # Shared templates (chezmoi standard)
+│   └── vscode-cursor/                   # VS Code & Cursor canonical settings
+│       ├── settings.json                # Shared settings for all platforms
+│       └── keybindings.json             # Shared keybindings for all platforms
+├── bootstrap/                            # Bootstrap scripts for initial setup
+│   ├── macos.sh                         # macOS-specific setup
+│   ├── linux.sh                         # Linux/Ubuntu setup
+│   └── common.sh                        # Shared functions
+├── scripts/                              # Utility scripts
+│   ├── install-tools.sh.tmpl            # Development tools installation
+│   └── setup-nvim.sh.tmpl               # Neovim configuration setup
+├── dot_zshrc.tmpl                       # Zsh configuration with OS templating
+├── dot_zshenv                           # Zsh environment variables
+├── dot_config/                          # Linux app configurations (~/.config/)
+│   ├── Code/User/                       # VS Code settings (symlinks to .chezmoitemplates/)
+│   └── Cursor/User/                     # Cursor settings (symlinks to .chezmoitemplates/)
+├── private_Library/                     # macOS app configurations (~/Library/)
 │   └── Application Support/
-│       ├── Code/User/         # VS Code settings (symlinks to .shared/)
-│       └── Cursor/User/       # Cursor settings (symlinks to .shared/)
-├── run_once_*.sh.tmpl         # Chezmoi run-once scripts
-└── mac-setup-steps.md         # Historical setup documentation
+│       ├── Code/User/                   # VS Code settings (symlinks to .chezmoitemplates/)
+│       └── Cursor/User/                 # Cursor settings (symlinks to .chezmoitemplates/)
+├── run_once_*.sh.tmpl                   # Chezmoi run-once scripts
+├── run_onchange_before_sync-vscode-to-windows.sh.tmpl  # WSL → Windows sync script
+└── mac-setup-steps.md                   # Historical setup documentation
 ```
 
 ## Common Commands
@@ -73,34 +74,44 @@ chezmoi update                 # Pull and apply latest changes
 ## Template Variables
 
 The repository uses chezmoi templates with these variables:
-- `{{ .is_macos }}` / `{{ .is_linux }}` - OS detection
+- `{{ .is_macos }}` / `{{ .is_linux }}` / `{{ .is_wsl }}` - OS detection
 - `{{ .package_manager }}` - "brew" or "apt"
+- `{{ .windows_username }}` - Windows username (WSL only, prompted on first run)
 - `{{ .chezmoi.hostname }}` / `{{ .chezmoi.username }}` - System info
 
 ## VS Code & Cursor Configuration
 
-The repository uses a shared configuration approach for VS Code and Cursor across both macOS and Ubuntu:
+The repository uses a shared configuration approach for VS Code and Cursor across macOS, Linux, and Windows (via WSL):
 
-**Canonical Files**: `.shared/vscode-cursor/settings.json.tmpl` and `.shared/vscode-cursor/keybindings.json`
+**Canonical Files**: `.chezmoitemplates/vscode-cursor/settings.json` and `.chezmoitemplates/vscode-cursor/keybindings.json`
 
-**Deployment Strategy**: Chezmoi creates symlinks from the platform-specific locations to the shared files:
-- **macOS**: `~/Library/Application Support/{Code,Cursor}/User/` → `.shared/vscode-cursor/`
-- **Ubuntu**: `~/.config/{Code,Cursor}/User/` → `.shared/vscode-cursor/`
+**Deployment Strategy**:
+- **macOS**: Symlinks from `~/Library/Application Support/{Code,Cursor}/User/` → `.chezmoitemplates/vscode-cursor/`
+- **Linux**: Symlinks from `~/.config/{Code,Cursor}/User/` → `.chezmoitemplates/vscode-cursor/`
+- **Windows (via WSL)**: Automated copy via `run_onchange` script to `/mnt/c/Users/<username>/AppData/Roaming/{Code,Cursor}/User/`
 
 **To Edit Settings**:
 ```bash
-# Edit the canonical files
-chezmoi edit ~/.local/share/chezmoi/.shared/vscode-cursor/settings.json.tmpl
-chezmoi edit ~/.local/share/chezmoi/.shared/vscode-cursor/keybindings.json
+# Edit the canonical files (in the source directory)
+chezmoi edit ~/.local/share/chezmoi/.chezmoitemplates/vscode-cursor/settings.json
+chezmoi edit ~/.local/share/chezmoi/.chezmoitemplates/vscode-cursor/keybindings.json
 
-# Apply to all locations
+# Or edit directly
+vim ~/.local/share/chezmoi/.chezmoitemplates/vscode-cursor/settings.json
+
+# Apply to all locations (macOS/Linux symlinks + Windows copy on WSL)
 chezmoi apply
 ```
+
+**WSL → Windows Sync**:
+The `run_onchange_before_sync-vscode-to-windows.sh.tmpl` script automatically copies settings to Windows when files change. It uses checksums to detect changes and only runs on WSL systems.
 
 ## Notes
 
 - Bootstrap scripts handle initial tool installation and system setup
-- run_once scripts ensure tools are installed when chezmoi is applied
-- VS Code and Cursor share identical configurations via symlinks to `.shared/vscode-cursor/`
-- All 4 combinations (VS Code/Cursor × macOS/Ubuntu) use the same settings
+- `run_once_*` scripts ensure tools are installed when chezmoi is applied
+- `run_onchange_*` scripts re-run when their embedded checksums change (e.g., Windows sync)
+- VS Code and Cursor share identical configurations via `.chezmoitemplates/vscode-cursor/`
+- All platforms (macOS, Linux, WSL/Windows) use the same settings
+- WSL automatically syncs settings to Windows side via copy (not symlink, as WSL→Windows symlinks don't work reliably)
 - Browser bookmark syncing not yet implemented (future enhancement)

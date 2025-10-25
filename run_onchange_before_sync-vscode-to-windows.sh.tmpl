@@ -1,0 +1,48 @@
+#!/bin/bash
+# This script syncs VS Code and Cursor settings from WSL to Windows
+# It will automatically re-run when the source files change (due to checksums below)
+
+{{- if .is_wsl }}
+
+# Checksums of source files - script reruns when these change
+# settings.json hash: {{ include ".chezmoitemplates/vscode-cursor/settings.json" | sha256sum }}
+# keybindings.json hash: {{ include ".chezmoitemplates/vscode-cursor/keybindings.json" | sha256sum }}
+
+WINDOWS_USER="{{ .windows_username }}"
+SOURCE_DIR="{{ .chezmoi.sourceDir }}/.chezmoitemplates/vscode-cursor"
+
+# Windows paths (accessed via /mnt/c from WSL)
+WIN_APPDATA="/mnt/c/Users/${WINDOWS_USER}/AppData/Roaming"
+VSCODE_WIN="${WIN_APPDATA}/Code/User"
+CURSOR_WIN="${WIN_APPDATA}/Cursor/User"
+
+echo "Syncing VS Code and Cursor settings to Windows..."
+
+# Create directories if they don't exist
+mkdir -p "${VSCODE_WIN}"
+mkdir -p "${CURSOR_WIN}"
+
+# Copy settings.json to both VS Code and Cursor on Windows
+if [ -f "${SOURCE_DIR}/settings.json" ]; then
+    cp "${SOURCE_DIR}/settings.json" "${VSCODE_WIN}/settings.json"
+    cp "${SOURCE_DIR}/settings.json" "${CURSOR_WIN}/settings.json"
+    echo "  ✓ settings.json synced to Windows"
+else
+    echo "  ✗ settings.json not found at ${SOURCE_DIR}/settings.json"
+fi
+
+# Copy keybindings.json to both VS Code and Cursor on Windows
+if [ -f "${SOURCE_DIR}/keybindings.json" ]; then
+    cp "${SOURCE_DIR}/keybindings.json" "${VSCODE_WIN}/keybindings.json"
+    cp "${SOURCE_DIR}/keybindings.json" "${CURSOR_WIN}/keybindings.json"
+    echo "  ✓ keybindings.json synced to Windows"
+else
+    echo "  ✗ keybindings.json not found at ${SOURCE_DIR}/keybindings.json"
+fi
+
+echo "Windows sync complete!"
+
+{{- else }}
+# Not running on WSL, skip Windows sync
+exit 0
+{{- end }}
