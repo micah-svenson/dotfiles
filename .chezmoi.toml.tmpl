@@ -1,20 +1,32 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
+{{- $windows_username := "" -}}
+{{- $is_wsl := or (env "WSL_DISTRO_NAME") (and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease | lower)) -}}
+{{- if $is_wsl -}}
+{{-   $windows_username = promptStringOnce . "windows_username" "Windows username (for WSL)" -}}
+{{- end -}}
 
 [data]
 email = {{ $email | quote }}
+{{- if $is_wsl }}
+windows_username = {{ $windows_username | quote }}
+{{- end }}
 hostname = {{ .chezmoi.hostname | quote }}
 username = {{ .chezmoi.username | quote }}
 
 {{- if eq .chezmoi.os "darwin" }}
 is_macos = true
 is_linux = false
+is_wsl = false
 package_manager = "brew"
 {{- else if eq .chezmoi.os "linux" }}
 is_macos = false
 is_linux = true
+is_wsl = {{ $is_wsl }}
 package_manager = "apt"
 {{- end }}
 
 [edit]
 command = "nvim"
 
+[diff]
+pager = "delta"

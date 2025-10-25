@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# This script runs once before applying dotfiles to bootstrap the system
+echo "🚀 Running bootstrap script..."
+
+# Get the directory where this script is located (chezmoi source directory)
+SCRIPT_DIR="{{ .chezmoi.sourceDir }}"
+
+{{ if eq .chezmoi.os "darwin" -}}
+# macOS
+echo "🍎 Detected macOS - running macOS bootstrap..."
+bash "$SCRIPT_DIR/bootstrap/macos.sh"
+{{ else if eq .chezmoi.os "linux" -}}
+# Linux
+echo "🐧 Detected Linux - running Linux bootstrap..."
+bash "$SCRIPT_DIR/bootstrap/linux.sh"
+{{ else -}}
+# Unsupported OS
+echo "❌ Unsupported operating system: {{ .chezmoi.os }}"
+exit 1
+{{ end -}}
+
+echo "✅ Bootstrap completed successfully!"
