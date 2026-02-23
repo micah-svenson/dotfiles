@@ -106,6 +106,11 @@ chezmoi apply
 **WSL → Windows Sync**:
 The `run_onchange_before_sync-vscode-to-windows.sh.tmpl` script automatically copies settings to Windows when files change. It uses checksums to detect changes and only runs on WSL systems.
 
+## Working Principles
+
+- **All config changes must go through this repo.** Never edit config files directly on the machine. Always use `chezmoi add` to bring in new files, edit via `chezmoi edit` or directly in the source dir, then `chezmoi apply` to deploy. Commit and push after applying.
+- When asked to modify any tool configuration (zsh, tmux, git, editors, etc.), the change should be made in this dotfiles repo and applied via chezmoi.
+
 ## Notes
 
 - Bootstrap scripts handle initial tool installation and system setup
