@@ -28,7 +28,9 @@ brew install --formula \
   wget \
   jq \
   tree \
-  htop
+  htop \
+  tmux \
+  gh
 
 # Install GUI applications
 echo "🖥️  Installing GUI applications..."
@@ -38,7 +40,8 @@ brew install --cask \
   cursor \
   obsidian \
   bitwarden \
-  karabiner-elements
+  karabiner-elements \
+  google-chrome
 
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
