@@ -1,5 +1,8 @@
 # Note: Use `omz reload` to "source" changes to this file.
 
+export LC_ALL=C.utf8
+export LANG=C.utf8
+
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -34,10 +37,16 @@ export PATH="$PATH:/home/micah/projects/git-filter-repo"
 export PATH="$PATH:/opt/apache-maven-3.9.9/bin"
 export PATH="$PATH:/home/micah/.local/share/lua-language-server/bin"
 export PATH="$PATH:/usr/local/go/bin"
+export PATH="$PATH:/home/micah/.local/share/splunk/splunk/bin"
 
 # Add local bin to PATH if it exists
 if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Add yarn global bin to PATH
+if [ -d "$HOME/.yarn/bin" ]; then
+    export PATH="$HOME/.yarn/bin:$PATH"
 fi
 {{- end }}
 
@@ -72,6 +81,9 @@ fi
 {{- end }}
 
 ## CUSTOM CONFIG ##
+
+# Persistent SSH agent (systemd user service)
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
 
 # Setup Node Version Manager
 export NVM_DIR="$HOME/.nvm"
