@@ -1,4 +1,5 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
+{{- $notes_dir := promptStringOnce . "notes_dir" "Notes directory (e.g. ~/Projects/notes)" -}}
 {{- $windows_username := "" -}}
 {{- $is_wsl := or (env "WSL_DISTRO_NAME") (and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease | lower)) -}}
 {{- if $is_wsl -}}
@@ -7,6 +8,7 @@
 
 [data]
 email = {{ $email | quote }}
+notes_dir = {{ $notes_dir | quote }}
 {{- if $is_wsl }}
 windows_username = {{ $windows_username | quote }}
 {{- end }}

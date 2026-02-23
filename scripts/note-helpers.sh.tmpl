@@ -1,0 +1,187 @@
+#!/bin/bash
+# Note management helpers
+# Deployed via chezmoi to all machines
+# Notes directory is configured via chezmoi (notes_dir in .chezmoi.toml)
+
+NOTES_DIR="{{ .notes_dir }}"
+NOTES_INBOX="$NOTES_DIR/inbox"
+NOTES_ORGANIZED="$NOTES_DIR/notes"
+NOTES_WORK="$NOTES_DIR/work"
+NOTES_MIGRATED="$NOTES_DIR/migrated"
+
+# qn [name] - Quick note capture
+# Creates a new note in inbox/ with auto-generated filename
+qn() {
+    mkdir -p "$NOTES_INBOX"
+    local date_prefix
+    date_prefix=$(date +%Y-%m-%d)
+    local filename
+
+    if [ -n "$1" ]; then
+        # Slugify the name: lowercase, replace spaces with hyphens
+        local slug
+        slug=$(echo "$*" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
+        filename="${date_prefix}-${slug}.md"
+    else
+        local timestamp
+        timestamp=$(date +%H%M%S)
+        filename="${date_prefix}-${timestamp}.md"
+    fi
+
+    local filepath="$NOTES_INBOX/$filename"
+    if [ ! -f "$filepath" ]; then
+        echo "# $(echo "$*" | sed 's/^./\U&/')" > "$filepath"
+        echo "" >> "$filepath"
+    fi
+    ${EDITOR:-nvim} "$filepath"
+}
+
+# notes-find - Interactive note finder using fzf
+# Fuzzy-find across inbox/ and notes/, preview in right pane, open in editor
+notes-find() {
+    if ! command -v fzf &>/dev/null; then
+        echo "fzf is required. Install it first."
+        return 1
+    fi
+
+    local selected
+    selected=$(find "$NOTES_INBOX" "$NOTES_ORGANIZED" -name '*.md' -type f 2>/dev/null | \
+        sed "s|$NOTES_DIR/||" | \
+        fzf --preview "cat '$NOTES_DIR/{}'" \
+            --preview-window=right:60%:wrap \
+            --header="Notes (inbox/ + notes/)")
+
+    if [ -n "$selected" ]; then
+        ${EDITOR:-nvim} "$NOTES_DIR/$selected"
+    fi
+}
+
+# notes-search <term> - Grep across notes with fzf
+# Search note content, present matches in fzf, open selected in editor
+notes-search() {
+    if [ -z "$1" ]; then
+        echo "Usage: notes-search <term>"
+        return 1
+    fi
+    if ! command -v fzf &>/dev/null; then
+        echo "fzf is required. Install it first."
+        return 1
+    fi
+
+    local selected
+    selected=$(grep -rl "$1" "$NOTES_INBOX" "$NOTES_ORGANIZED" 2>/dev/null | \
+        sed "s|$NOTES_DIR/||" | \
+        fzf --preview "grep -n --color=always '$1' '$NOTES_DIR/{}'" \
+            --preview-window=right:60%:wrap \
+            --header="Search results for: $1")
+
+    if [ -n "$selected" ]; then
+        ${EDITOR:-nvim} "$NOTES_DIR/$selected"
+    fi
+}
+
+# notes-triage - Process inbox notes interactively
+# For each note in inbox/: preview, then promote, move to work, or trash
+notes-triage() {
+    local inbox_files
+    inbox_files=($(find "$NOTES_INBOX" -name '*.md' -type f 2>/dev/null | sort))
+
+    if [ ${#inbox_files[@]} -eq 0 ]; then
+        echo "Inbox is empty. Nothing to triage."
+        return 0
+    fi
+
+    echo "Found ${#inbox_files[@]} note(s) in inbox."
+    echo ""
+
+    local promoted=0
+    local worked=0
+    local trashed=0
+
+    for filepath in "${inbox_files[@]}"; do
+        local basename
+        basename=$(basename "$filepath")
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "File: $basename"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        head -20 "$filepath"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        local action=""
+        while [[ ! "$action" =~ ^[pwtes]$ ]]; do
+            echo -n "[p]romote to notes/  [w]ork (move to work/)  [t]rash  [e]dit  [s]kip: "
+            read -r action
+        done
+
+        case "$action" in
+            p)
+                mkdir -p "$NOTES_ORGANIZED"
+                echo -n "New filename (without .md, enter to keep '$basename'): "
+                read -r new_name
+                if [ -n "$new_name" ]; then
+                    new_name="${new_name%.md}.md"
+                else
+                    new_name="$basename"
+                fi
+                mv "$filepath" "$NOTES_ORGANIZED/$new_name"
+                echo "Promoted to notes/$new_name"
+                ((promoted++))
+                ;;
+            w)
+                mkdir -p "$NOTES_WORK"
+                mv "$filepath" "$NOTES_WORK/$basename"
+                echo "Moved to work/$basename"
+                ((worked++))
+                ;;
+            t)
+                echo -n "Delete $basename? [y/N]: "
+                read -r confirm
+                if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                    rm "$filepath"
+                    echo "Deleted."
+                    ((trashed++))
+                else
+                    echo "Kept."
+                fi
+                ;;
+            e)
+                ${EDITOR:-nvim} "$filepath"
+                echo "Edited. Re-run notes-triage to process again."
+                ;;
+            s)
+                echo "Skipped."
+                ;;
+        esac
+        echo ""
+    done
+
+    echo "Triage complete: $promoted promoted, $worked to work, $trashed trashed."
+
+    if [ $promoted -gt 0 ]; then
+        echo ""
+        echo -n "Commit and push promoted notes? [y/N]: "
+        read -r do_push
+        if [[ "$do_push" =~ ^[Yy]$ ]]; then
+            notes-push
+        fi
+    fi
+}
+
+# notes-push - Quick commit and push notes
+# Commits notes/, migrated/, monthly/, and todos.md (excludes inbox/ and work/)
+notes-push() {
+    cd "$NOTES_DIR" || return 1
+
+    if ! git diff --quiet HEAD -- notes/ migrated/ monthly/ todos.md 2>/dev/null || \
+       [ -n "$(git ls-files --others --exclude-standard notes/ migrated/ monthly/ todos.md 2>/dev/null)" ]; then
+        git add notes/ migrated/ monthly/ todos.md
+        git commit -m "update notes $(date +%Y-%m-%d)"
+        git push
+        echo "Notes pushed."
+    else
+        echo "No changes to push."
+    fi
+
+    cd - > /dev/null || return
+}
