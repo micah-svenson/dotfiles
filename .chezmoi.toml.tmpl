@@ -23,7 +23,7 @@ package_manager = "brew"
 {{- else if eq .chezmoi.os "linux" }}
 is_macos = false
 is_linux = true
-is_wsl = {{ $is_wsl }}
+is_wsl = {{ if $is_wsl }}true{{ else }}false{{ end }}
 package_manager = "apt"
 {{- end }}
 
