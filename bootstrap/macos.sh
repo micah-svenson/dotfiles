@@ -34,6 +34,7 @@ brew install --formula \
 
 # Install GUI applications
 echo "🖥️  Installing GUI applications..."
+# Using || true to ignore failures for casks that may already be installed
 brew install --cask \
   iterm2 \
   visual-studio-code \
@@ -41,7 +42,8 @@ brew install --cask \
   obsidian \
   bitwarden \
   karabiner-elements \
-  google-chrome
+  google-chrome \
+  || true
 
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
