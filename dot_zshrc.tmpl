@@ -41,6 +41,36 @@ if [ -d "$HOME/.local/bin" ]; then
 fi
 {{- end }}
 
+## Note Management ##
+# Source note helper functions (qn, notes-find, notes-search, notes-triage, notes-push)
+if [ -f "$HOME/scripts/note-helpers.sh" ]; then
+    source "$HOME/scripts/note-helpers.sh"
+fi
+
+# Note reminders on shell startup
+{{- if .is_linux }}
+if [ -d "{{ .notes_dir }}/inbox" ]; then
+    _inbox_count=$(find "{{ .notes_dir }}/inbox" -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_inbox_count" -gt 0 ]; then
+        echo "\U0001f4dd $_inbox_count note(s) in inbox. Run 'notes-triage' to organize."
+    fi
+fi
+if [ -d "{{ .notes_dir }}/.git" ]; then
+    _unpushed=$(git -C "{{ .notes_dir }}" log --oneline @{u}.. 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_unpushed" -gt 0 ]; then
+        echo "\U0001f4e4 You have unpushed note changes. Run 'notes-push' to sync."
+    fi
+fi
+{{- end }}
+{{- if .is_macos }}
+if [ -d "{{ .notes_dir }}/notes" ]; then
+    _migrate_count=$(find "{{ .notes_dir }}/notes" -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_migrate_count" -gt 0 ]; then
+        echo "\U0001f4da $_migrate_count note(s) ready for migration. Run claude and use /migrate-notes to polish and move them."
+    fi
+fi
+{{- end }}
+
 ## CUSTOM CONFIG ##
 
 # Setup Node Version Manager
