@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Toggle an IDE-like bottom terminal pane (persistent across toggles).
+# Works by breaking the pane into a hidden background window and restoring it.
+# Compatible with macOS and Linux.
+
+TERM_NAME="_ide_term"
+
+# Check for a hidden window containing our terminal
+hidden=$(tmux list-windows -F '#{window_id} #{window_name}' \
+  | awk -v n="$TERM_NAME" '$2==n {print $1; exit}')
+
+if [ -n "$hidden" ]; then
+    # Terminal is hidden -> show it
+    tmux join-pane -v -l 30% -s "${hidden}.0"
+else
+    # Check if terminal pane is currently visible (by pane title marker)
+    visible=$(tmux list-panes -F '#{pane_id} #{pane_title}' \
+      | awk -v n="$TERM_NAME" '$2==n {print $1; exit}')
+
+    if [ -n "$visible" ]; then
+        # Terminal is visible -> hide it to a background window
+        tmux break-pane -d -s "$visible" -n "$TERM_NAME"
+    else
+        # No terminal exists -> create one and mark it
+        tmux split-window -v -l 30%
+        tmux select-pane -T "$TERM_NAME"
+    fi
+fi
