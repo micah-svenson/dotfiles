@@ -54,7 +54,7 @@ fi
 # Set zsh as default shell
 if [ "$SHELL" != "$(which zsh)" ]; then
   echo "🐚 Setting zsh as default shell..."
-  chsh -s $(which zsh)
+  chsh -s "$(which zsh)" || echo "⚠️  Could not change default shell automatically (run manually: chsh -s $(which zsh))"
 fi
 
 # Install nvm (Node Version Manager)
