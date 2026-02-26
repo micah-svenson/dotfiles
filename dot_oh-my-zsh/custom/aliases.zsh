@@ -95,6 +95,36 @@ ff() {
     find . -type f | fzf --preview 'bat --color=always {} 2>/dev/null || cat {}'
 }
 
+# Fuzzy search aliases and functions; Enter inserts the name at the prompt
+fa() {
+  local tmp selection
+  tmp=$(mktemp)
+  { alias; printf '\n'; typeset -f; } > "$tmp"
+
+  selection=$(
+    {
+      alias | while IFS='=' read -r name val; do
+        val="${val#\'}"
+        val="${val%\'}"
+        printf "%-22s  \033[33malias\033[0m  %s\n" "$name" "$val"
+      done
+
+      typeset +f | grep -v '^_' | sort | while read -r fn; do
+        first=$(typeset -f "$fn" | awk 'NR==3{gsub(/^[[:space:]]*/,""); if(length>55) $0=substr($0,1,52)"..."; print; exit}')
+        printf "%-22s  \033[36mfn\033[0m     %s\n" "$fn" "$first"
+      done
+    } | fzf \
+        --ansi \
+        --reverse \
+        --height 60% \
+        --header 'fa: aliases & functions — Enter to insert at prompt' \
+        --preview "name=\$(echo {} | awk '{print \$1}'); grep -A 30 \"^\$name ()\" \"$tmp\" | head -30 || grep \"^\$name=\" \"$tmp\"" \
+        --preview-window 'right:50%:wrap'
+  )
+
+  rm -f "$tmp"
+  [[ -n "$selection" ]] && print -z -- "${selection%% *}"
+}
 
 # Save and jump to bookmarked directories
 bookmark() {
@@ -170,15 +200,41 @@ function gl-issue {
 
 
 # ── Claude Code ─────────────────────────────────────────────────────
-alias co="claude --model claude-opus-4-6"
-alias cs="claude --model claude-sonnet-4-6"
-alias ch="claude --model claude-haiku-4-5-20251001"
+alias cld="claude"
+alias cldp="claude -p"
+alias cldo="claude --model opus"
+alias clds="claude --model sonnet"
+alias cldh="claude --model haiku"
+alias cldr="claude --resume"
+# alias cldys="claude --dangerously-skip-permissions --model sonnet"
+# alias cldy="claude --dangerously-skip-permissions --model sonnet"
+# alias cldyo="claude --dangerously-skip-permissions --model opus"
+# alias lfg="claude --dangerously-skip-permissions --model opus"
+# alias cldpy="claude -p --dangerously-skip-permissions"
+# alias cldpyo="claude -p --dangerously-skip-permissions --model opus"
 
 # Edit global Claude config
-alias cclaude="vim ~/.claude/CLAUDE.md"
+alias cldcfg="vim ~/.claude/CLAUDE.md"
 
-# ── WSL open ─────────────────────────────────────────────────────────
-alias open="xdg-open"
+# ── Claude Plugin Dev ────────────────────────────────────────────────
+CLAUDE_PLUGIN_DEV=~/Projects/claude-plugin-dev
+
+# List available plugins in the dev marketplace
+cldplugins() {
+  ls "$CLAUDE_PLUGIN_DEV/plugins/"
+}
+
+# Launch Claude with one or more dev plugins loaded via --plugin-dir
+# Usage: clddev <plugin-name> [<plugin-name>...]
+# Example: clddev example
+# Example: clddev formatter linter
+clddev() {
+  local plugin_args=()
+  for plugin in "$@"; do
+    plugin_args+=(--plugin-dir "$CLAUDE_PLUGIN_DEV/plugins/$plugin")
+  done
+  claude "${plugin_args[@]}"
+}
 
 # ── Task Workspace: auto-rename tmux session on cd ──────────────────
 chpwd() {
