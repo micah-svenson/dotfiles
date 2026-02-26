@@ -22,7 +22,9 @@ plugins=(git notes)
 source $ZSH/oh-my-zsh.sh
 
 # Add ~/.local/bin/ to PATH
-[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
 
 {{- if .is_macos }}
 # macOS specific aliases and settings
