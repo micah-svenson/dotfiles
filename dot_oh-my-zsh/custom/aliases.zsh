@@ -141,8 +141,6 @@ alias duh='sudo du -h --threshold=1000000 ./*'
 alias pyenv='source env/bin/activate'
 alias pyvenv='source .venv/bin/activate'
 
-alias notes="cd ~/projects/notes && vim ."
-
 function sync-ssh-configs {
   user_ssh=$HOME/.ssh
   root_ssh=/root/.ssh
@@ -156,21 +154,6 @@ function sync-ssh-configs {
   echo "copying ${user_ssh}/config to ${windows_ssh}"
   cp "$user_ssh/config" "$windows_ssh/config"
 }
-
-function generate_quicknote {
-
-  if [ $# -eq 0 ]; then
-    nvim ~/projects/notes/quicknote_$(date +"%m-%d-%Y_%H:%M")
-  else
-    nvim ~/projects/notes/${1}
-  fi
-}
-
-alias qn="generate_quicknote"
-
-alias todo="cd ~/projects/notes && vim todos.md"
-alias tdo="grep -e '\[ \]' ~/projects/notes/todos.md"
-alias tdone="grep -e '\[x\]' ~/projects/notes/todos.md"
 
 alias d="docker"
 alias dc="docker-compose"

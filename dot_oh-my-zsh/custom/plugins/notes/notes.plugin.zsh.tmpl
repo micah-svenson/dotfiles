@@ -1,13 +1,17 @@
-#!/bin/bash
-# Note management helpers
-# Deployed via chezmoi to all machines
-# Notes directory is configured via chezmoi (notes_dir in .chezmoi.toml)
+# Notes plugin for oh-my-zsh
+# Managed by chezmoi — edit in dotfiles repo
 
 NOTES_DIR="{{ .notes_dir }}"
 NOTES_INBOX="$NOTES_DIR/inbox"
 NOTES_ORGANIZED="$NOTES_DIR/notes"
 NOTES_WORK="$NOTES_DIR/work"
 NOTES_MIGRATED="$NOTES_DIR/migrated"
+
+# Navigation aliases
+alias notes="cd $NOTES_DIR && nvim ."
+alias todo="cd $NOTES_DIR && nvim todos.md"
+alias tdo="grep -e '\[ \]' $NOTES_DIR/todos.md"
+alias tdone="grep -e '\[x\]' $NOTES_DIR/todos.md"
 
 # qn [name] - Quick note capture
 # Creates a new note in inbox/ with auto-generated filename
@@ -185,3 +189,27 @@ notes-push() {
 
     cd - > /dev/null || return
 }
+
+# Startup reminders
+{{- if .is_linux }}
+if [ -d "{{ .notes_dir }}/inbox" ]; then
+    _inbox_count=$(find "{{ .notes_dir }}/inbox" -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_inbox_count" -gt 0 ]; then
+        echo "\U0001f4dd $_inbox_count note(s) in inbox. Run 'notes-triage' to organize."
+    fi
+fi
+if [ -d "{{ .notes_dir }}/.git" ]; then
+    _unpushed=$(git -C "{{ .notes_dir }}" log --oneline @{u}.. 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_unpushed" -gt 0 ]; then
+        echo "\U0001f4e4 You have unpushed note changes. Run 'notes-push' to sync."
+    fi
+fi
+{{- end }}
+{{- if .is_macos }}
+if [ -d "{{ .notes_dir }}/notes" ]; then
+    _migrate_count=$(find "{{ .notes_dir }}/notes" -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$_migrate_count" -gt 0 ]; then
+        echo "\U0001f4da $_migrate_count note(s) ready for migration. Run claude and use /migrate-notes to polish and move them."
+    fi
+fi
+{{- end }}
