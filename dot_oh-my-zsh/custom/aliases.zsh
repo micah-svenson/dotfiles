@@ -206,6 +206,7 @@ alias cldo="claude --model opus"
 alias clds="claude --model sonnet"
 alias cldh="claude --model haiku"
 alias cldr="claude --resume"
+alias cldt='claude --system-prompt "$(cat /home/micah/projects/mi-todos/agent/todo-agent.md)"'
 # alias cldys="claude --dangerously-skip-permissions --model sonnet"
 # alias cldy="claude --dangerously-skip-permissions --model sonnet"
 # alias cldyo="claude --dangerously-skip-permissions --model opus"
