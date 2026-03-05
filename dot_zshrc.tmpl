@@ -69,6 +69,9 @@ if [ -d "$HOME/.fzf/bin" ]; then
   source <(fzf --zsh)
 fi
 
+# Load credentials
+[ -f "$HOME/.sonar-credentials" ] && source "$HOME/.sonar-credentials"
+
 # Language options
 export UV_PYTHON="/usr/bin/python3.12"
 export NODE_OPTIONS="--max-old-space-size=4096"
