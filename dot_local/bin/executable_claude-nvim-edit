@@ -1,0 +1,43 @@
+#!/bin/bash
+# claude-nvim-edit: Open nvim in a tmux popup for editing
+# Outputs the final file content to stdout when nvim closes
+#
+# Modes:
+#   claude-nvim-edit                     # blank scratch buffer
+#   claude-nvim-edit <filepath>          # edit existing file
+#   echo "content" | claude-nvim-edit   # edit piped content
+
+if [ -z "${TMUX:-}" ]; then
+    echo "Error: must be run inside a tmux session" >&2
+    exit 1
+fi
+
+TMPFILE=""
+CLEANUP=false
+
+if [ $# -ge 1 ]; then
+    # File path provided — edit in-place
+    TARGET="$1"
+elif [ ! -t 0 ]; then
+    # Content on stdin — write to temp file
+    TMPFILE=$(mktemp /tmp/claude-edit-XXXXXX.md)
+    cat > "$TMPFILE"
+    TARGET="$TMPFILE"
+    CLEANUP=true
+else
+    # No args, no stdin — blank scratch buffer
+    TMPFILE=$(mktemp /tmp/claude-edit-XXXXXX.md)
+    TARGET="$TMPFILE"
+    CLEANUP=true
+fi
+
+# Open nvim in a tmux popup (blocks until user exits nvim)
+tmux display-popup -E -w 90% -h 90% -d "$(pwd)" "nvim '$TARGET'"
+
+# Return the content so the caller (Claude) can read it
+cat "$TARGET"
+
+# Cleanup temp file if we created one
+if [ "$CLEANUP" = true ]; then
+    rm -f "$TMPFILE"
+fi
