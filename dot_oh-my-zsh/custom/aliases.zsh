@@ -140,8 +140,10 @@ jumpmark() {
     fi
 }
 
-# Tmux session picker/creator for projects
-alias pt="~/.local/bin/tmux-sessionizer"
+# Quick tmux session picker/creator (works outside tmux)
+tm() {
+    ~/.local/bin/tmux-sessionizer
+}
 
 alias lg="lazygit"
 
