@@ -32,33 +32,35 @@ trap "rm -rf $TEMP_DIR" EXIT
 
 # Install ripgrep (latest version)
 echo "📦 Installing ripgrep..."
-RG_DEB_URL=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[] | select(.name | endswith("_amd64.deb")) | .browser_download_url')
-curl -L "$RG_DEB_URL" -o "$TEMP_DIR/ripgrep.deb"
+RG_VERSION=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.tag_name')
+curl -L "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}_amd64.deb" -o "$TEMP_DIR/ripgrep.deb"
 sudo dpkg -i "$TEMP_DIR/ripgrep.deb"
 
-# Install fzf (binary only — shell integration is managed by chezmoi in .zshrc)
+# Install fzf
 echo "🔍 Installing fzf..."
 if [ ! -d "$HOME/.fzf" ]; then
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  ~/.fzf/install --all
+else
+  echo "fzf already installed, skipping..."
 fi
-~/.fzf/install --bin
 
 # Install git-delta (latest version)
 echo "📦 Installing git-delta..."
-DELTA_DEB_URL=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.assets[] | select(.name | test("^git-delta_.*_amd64\\.deb$")) | .browser_download_url')
-curl -L "$DELTA_DEB_URL" -o "$TEMP_DIR/git-delta.deb"
+DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
+curl -L "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb" -o "$TEMP_DIR/git-delta.deb"
 sudo dpkg -i "$TEMP_DIR/git-delta.deb"
 
 # Install neovim (latest version)
 echo "📝 Installing Neovim..."
-curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz -o "$TEMP_DIR/nvim-linux-x86_64.tar.gz"
-sudo rm -rf /opt/nvim-linux-x86_64
-sudo tar -C /opt -xzf "$TEMP_DIR/nvim-linux-x86_64.tar.gz"
-sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz -o "$TEMP_DIR/nvim-linux64.tar.gz"
+sudo rm -rf /opt/nvim-linux64
+sudo tar -C /opt -xzf "$TEMP_DIR/nvim-linux64.tar.gz"
+sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
 
 # Install chezmoi
 echo "🏠 Installing chezmoi..."
-sh -c "$(curl -fsLS get.chezmoi.io)"
+sh -c "$(curl -fsLS get.chezmoi.io/getlb)"
 
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

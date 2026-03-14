@@ -28,16 +28,6 @@
 	<true/>
 	<key>AlwaysOpenWindowAtStartup</key>
 	<false/>
-	<key>AppleAntiAliasingThreshold</key>
-	<integer>1</integer>
-	<key>ApplePressAndHoldEnabled</key>
-	<false/>
-	<key>AppleScrollAnimationEnabled</key>
-	<integer>0</integer>
-	<key>AppleSmoothFixedFontsSizeThreshold</key>
-	<integer>1</integer>
-	<key>AppleWindowTabbingMode</key>
-	<string>manual</string>
 	<key>Default Bookmark Guid</key>
 	<string>7DDEBFA0-75B4-48B6-AA48-9FEE693552CA</string>
 	<key>GlobalKeyMap</key>
@@ -2200,15 +2190,15 @@
 			<key>HotKey Alternate Shortcuts</key>
 			<array/>
 			<key>HotKey Characters</key>
-			<string></string>
+			<string></string>
 			<key>HotKey Characters Ignoring Modifiers</key>
-			<string></string>
+			<string>s</string>
 			<key>HotKey Key Code</key>
-			<integer>53</integer>
+			<integer>1</integer>
 			<key>HotKey Modifier Activation</key>
 			<integer>1</integer>
 			<key>HotKey Modifier Flags</key>
-			<integer>131072</integer>
+			<integer>1310720</integer>
 			<key>HotKey Window Animates</key>
 			<false/>
 			<key>HotKey Window AutoHides</key>
