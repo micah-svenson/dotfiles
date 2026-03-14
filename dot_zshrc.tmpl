@@ -28,6 +28,10 @@ fi
 
 {{- if .is_macos }}
 # macOS specific aliases and settings
+
+# OpenClaw Completion
+source "/Users/{{ .chezmoi.username }}/.openclaw/completions/openclaw.zsh"
+
 {{- end }}
 
 {{- if .is_linux }}

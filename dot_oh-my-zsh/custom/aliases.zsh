@@ -208,7 +208,6 @@ alias cldo="claude --model opus"
 alias clds="claude --model sonnet"
 alias cldh="claude --model haiku"
 alias cldr="claude --resume"
-alias cldt='claude --system-prompt "$(cat /home/micah/projects/mi-todos/agent/todo-agent.md)"'
 # alias cldys="claude --dangerously-skip-permissions --model sonnet"
 # alias cldy="claude --dangerously-skip-permissions --model sonnet"
 # alias cldyo="claude --dangerously-skip-permissions --model opus"
@@ -239,3 +238,17 @@ clddev() {
   claude "${plugin_args[@]}"
 }
 
+# ── Task Workspace: auto-rename tmux session on cd ──────────────────
+chpwd() {
+    [ -z "$TMUX" ] && return
+
+    local dir="$PWD"
+    if [[ "$dir" == */.tasks/* ]]; then
+        local tasks_parent="${dir%%/.tasks/*}"
+        local workspace="$(basename "$tasks_parent")"
+        local after_tasks="${dir#*/.tasks/}"
+        local task_name="${after_tasks%%/*}"
+        local session_name="$(echo "$workspace/$task_name" | tr './:' '___')"
+        tmux rename-session "$session_name" 2>/dev/null
+    fi
+}
