@@ -8,7 +8,7 @@
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>cd ~/Projects/Obsidian || exit 0; git fetch origin main 2>/dev/null || exit 0; git merge --ff-only origin/main 2>/dev/null || true; git add -A; if ! git diff --cached --quiet; then git commit -m "auto: sync $(date +%Y-%m-%d_%H:%M)"; git push origin main; fi</string>
+        <string>waited=0; while ! brctl status com.apple.CloudDocs 2>/dev/null | grep -q "caught-up"; do sleep 5; waited=$((waited + 5)); if [ $waited -ge 60 ]; then echo "iCloud still syncing after 60s, skipping"; exit 0; fi; done; cd ~/Projects/Obsidian || exit 0; git fetch origin main 2>/dev/null || exit 0; git merge --ff-only origin/main 2>/dev/null || true; git add -A; if ! git diff --cached --quiet; then git commit -m "auto: sync $(date +%Y-%m-%d_%H:%M)"; git push origin main; fi</string>
     </array>
     <key>StartInterval</key>
     <integer>300</integer>
