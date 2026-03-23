@@ -1,33 +1,93 @@
 #!/usr/bin/env bash
-# Fuzzy-find tmux sessions or create a new one.
-# Lists existing sessions; type a custom name to create a new session.
+# Fuzzy-find tmux sessions or create a new one for a project directory.
+# - Lists existing sessions + project dirs from ~/projects/
+# - Type a custom name and hit enter to create an ad-hoc session
+# - Creates/attaches/switches as needed
 # Works from inside or outside tmux.
+# Compatible with macOS and Linux.
 
-result=$(
-    tmux list-sessions -F "#{session_name}" 2>/dev/null |
-    fzf --prompt="tmux > " \
-        --header="select session / type name to create new" \
-        --print-query --reverse --height=40%
-)
+PROJECTS_DIR="$HOME/projects"
 
+# Build the fzf list: existing sessions first, then project dirs
+result=$({
+    # Existing sessions
+    tmux list-sessions -F "#{session_name}" 2>/dev/null
+
+    # Project directories (skip ones that already have a session)
+    if [ -d "$PROJECTS_DIR" ]; then
+        existing=$(tmux list-sessions -F "#{session_name}" 2>/dev/null)
+        for dir in "$PROJECTS_DIR"/*/; do
+            [ ! -d "$dir" ] && continue
+            base=$(basename "$dir")
+
+            # Normal project dir
+            name=$(echo "$base" | tr '.' '_')
+            if ! echo "$existing" | grep -qx "$name"; then
+                echo "+ $name"
+            fi
+
+            # Task workspaces: <project>/.tasks/<task>/
+            if [ -d "$dir.tasks" ]; then
+                for task_dir in "$dir.tasks"/*/; do
+                    [ ! -d "$task_dir" ] && continue
+                    # Only list tasks that have a .task.md file
+                    [ ! -f "$task_dir/.task.md" ] && continue
+                    task_name=$(basename "$task_dir")
+                    display="$base/$task_name"
+                    session=$(echo "$display" | tr './:' '___')
+                    if ! echo "$existing" | grep -qx "$session"; then
+                        echo "+ $display"
+                    fi
+                done
+            fi
+        done
+    fi
+} | fzf --prompt="tmux > " \
+    --header="select session / type name to create new" \
+    --print-query --reverse --height=40%)
+
+# fzf --print-query outputs: line 1 = typed query, line 2 = selected match
 query=$(echo "$result" | sed -n '1p')
 match=$(echo "$result" | sed -n '2p')
 
+# Nothing typed and nothing selected = user cancelled
 [ -z "$query" ] && [ -z "$match" ] && exit 0
 
 if [ -n "$match" ]; then
-    session_name="$match"
+    choice="$match"
 else
-    session_name="$query"
+    # No match selected — use the typed query as a new session name
+    choice="$query"
+fi
+
+# Strip the "+ " prefix if creating from a project dir
+if [[ "$choice" == "+ "* ]]; then
+    display_name="${choice#+ }"
+
+    # Check if this is a slash entry (task workspace)
+    if [[ "$display_name" == */* ]]; then
+        repo_name="${display_name%%/*}"
+        task_name="${display_name#*/}"
+        start_dir="$PROJECTS_DIR/$repo_name/.tasks/$task_name"
+        session_name="$display_name"
+    else
+        session_name="$display_name"
+        start_dir="$PROJECTS_DIR/$session_name"
+    fi
+else
+    session_name="$choice"
+    start_dir=""
 fi
 
 # Sanitize session name (tmux doesn't allow dots or colons)
 session_name=$(echo "$session_name" | tr './:' '___')
 
+# Create session if it doesn't exist
 if ! tmux has-session -t="$session_name" 2>/dev/null; then
-    tmux new-session -d -s "$session_name"
+    tmux new-session -d -s "$session_name" ${start_dir:+-c "$start_dir"}
 fi
 
+# Attach or switch
 if [ -z "$TMUX" ]; then
     tmux attach-session -t "$session_name"
 else

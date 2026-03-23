@@ -201,10 +201,18 @@ function gl-issue {
 }
 
 
+# ── OpenCode ────────────────────────────────────────────────────────
+alias oc="opencode"
+alias oco="opencode -m amazon-bedrock/micah-opus-4-6"
+alias ocs="opencode -m amazon-bedrock/micah-sonnet-4-6"
+alias och="opencode -m amazon-bedrock/micah-haiku-4-5"
+alias ocg="opencode -m openai/gpt-5.4"
+alias ocgm="opencode -m openai/gpt-5.4-mini"
+
 # ── Claude Code ─────────────────────────────────────────────────────
 alias cld="claude"
 alias cldp="claude -p"
-alias cldo="claude --model opus"
+alias cldo="claude --model opus --plugin-dir /home/micah/projects/loom/plugins/claude"
 alias clds="claude --model sonnet"
 alias cldh="claude --model haiku"
 alias cldr="claude --resume"
