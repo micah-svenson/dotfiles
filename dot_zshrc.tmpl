@@ -76,7 +76,9 @@ fi
 # Load credentials
 [ -f "$HOME/.sonar-credentials" ] && source "$HOME/.sonar-credentials"
 [ -f "$HOME/.openai-credentials" ] && source "$HOME/.openai-credentials"
+[ -f "$HOME/.jira-credentials" ] && source "$HOME/.jira-credentials"
 
 # Language options
 export NODE_OPTIONS="--max-old-space-size=4096"
+export CLAUDE_CODE_NO_FLICKER=1
 
