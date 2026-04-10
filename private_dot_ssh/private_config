@@ -1,0 +1,6 @@
+# PlutoBot — dedicated bot account on this machine
+Host plutobot
+  HostName localhost
+  User pluto
+  RequestTTY yes
+  RemoteCommand tmux new-session -A -s claude
