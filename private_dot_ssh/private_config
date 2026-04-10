@@ -3,4 +3,4 @@ Host plutobot
   HostName localhost
   User pluto
   RequestTTY yes
-  RemoteCommand tmux new-session -A -s claude
+  RemoteCommand /opt/homebrew/bin/tmux new-session -A -s claude

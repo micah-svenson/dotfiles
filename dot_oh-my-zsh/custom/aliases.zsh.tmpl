@@ -1,9 +1,11 @@
+{{ if .is_wsl -}}
 alias wslip="ip addr show eth0 | grep 'inet\b' | awk '{print $2}' | cut -d/ -f1"
 
 alias java-17="/usr/lib/jvm/java-17-amazon-corretto/bin/java"
 alias java-21="/usr/lib/jvm/java-21-amazon-corretto/bin/java"
 
 alias edot="explorer.exe ."
+{{ end -}}
 
 alias m="mvn"
 alias mcl="mvn clean"
@@ -17,10 +19,13 @@ alias cme="chezmoi edit"
 
 alias proj="cd ~/projects/"
 
+{{ if .is_wsl -}}
 alias hosts="vim /mnt/c/Windows/System32/drivers/etc/hosts"
+{{ end -}}
 
 alias msa="mvn spotless:apply"
 
+{{ if .is_wsl -}}
 # https://lloydrochester.com/post/unix/wsl-pbcopy-pbpaste/
 pbcopy() {
     tee <&0 | clip.exe
@@ -29,6 +34,7 @@ pbcopy() {
 pbpaste() {
     powershell.exe Get-Clipboard | sed 's/\r$//' | sed -z '$ s/\n$//'
 }
+{{ end -}}
 
 # Navigate to a directory using fzf.
 # Depth defaults to 1.
@@ -173,6 +179,7 @@ alias duh='sudo du -h --threshold=1000000 ./*'
 alias pyenv='source env/bin/activate'
 alias pyvenv='source .venv/bin/activate'
 
+{{ if .is_wsl -}}
 function sync-ssh-configs {
   user_ssh=$HOME/.ssh
   root_ssh=/root/.ssh
@@ -186,6 +193,7 @@ function sync-ssh-configs {
   echo "copying ${user_ssh}/config to ${windows_ssh}"
   cp "$user_ssh/config" "$windows_ssh/config"
 }
+{{ end -}}
 
 alias d="docker"
 alias dc="docker-compose"
@@ -193,12 +201,14 @@ alias dils="docker image ls"
 alias dcls="docker container ls"
 alias dr="docker run -it --rm"
 
+{{ if .is_wsl -}}
 alias edge="/mnt/c/Program\ Files\ \(x86\)/Microsoft/Edge/Application/msedge.exe"
 
 # Open a specific gitlab issue number in webtools
 function gl-issue {
   edge "https://gitlab.com/<group>/<project>/-/issues/${1}"
 }
+{{ end -}}
 
 
 # ── OpenCode ────────────────────────────────────────────────────────
