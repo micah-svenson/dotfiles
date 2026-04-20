@@ -29,9 +29,6 @@ fi
 {{- if .is_macos }}
 # macOS specific aliases and settings
 
-# OpenClaw Completion
-source "/Users/{{ .chezmoi.username }}/.openclaw/completions/openclaw.zsh"
-
 # PlutoBot — SSH into dedicated bot account
 alias pluto='ssh plutobot'
 alias pluto-watch='ssh pluto@localhost -t "tmux attach -t claude -r"'
