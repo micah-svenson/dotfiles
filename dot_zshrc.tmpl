@@ -74,14 +74,48 @@ if [ -d "$HOME/.fzf/bin" ]; then
   source <(fzf --zsh)
 fi
 
-# GPG TTY for pinentry-curses. Must be set before sourcing .secrets,
-# which calls `pass show`. Without GPG_TTY, pinentry-curses can't find
-# a terminal and hangs on first decrypt after reboot until Ctrl+C.
+# GPG TTY for pinentry-curses. Without it, pinentry can't find a
+# terminal and hangs on first decrypt after reboot until Ctrl+C.
 if [[ -t 0 ]]; then
     export GPG_TTY=$(tty)
 fi
 
-# Load secrets (API keys, credentials, etc.)
+# On-demand secrets. Two entry points:
+#   unlock-secrets   warms gpg-agent cache (one passphrase prompt unlocks
+#                    all). After this, `pass show <key>` is silent and
+#                    instant for the cache TTL. Nothing exported to env.
+#   load-secrets     also exports each secret as an env var. Use only
+#                    when a child process needs to read them from env
+#                    (e.g. opencode reading OPENAI_API_KEY).
+#
+# Pass keys to fetch. To add a new secret, append "VAR_NAME=pass/path".
+_SECRETS=(
+    "JIRA_PAT=credentials/jira-pat"
+    "OPENAI_API_KEY=credentials/openai-api-key"
+    "SONARQUBE_TOKEN=credentials/sonarqube-token"
+)
+
+unlock-secrets() {
+    local entry key
+    for entry in "${_SECRETS[@]}"; do
+        key="${entry#*=}"
+        pass show "$key" >/dev/null || { echo "unlock-secrets: failed on $key" >&2; return 1; }
+    done
+    echo "unlocked ${#_SECRETS[@]} secrets in gpg-agent cache"
+}
+
+load-secrets() {
+    local entry var key val
+    for entry in "${_SECRETS[@]}"; do
+        var="${entry%%=*}"
+        key="${entry#*=}"
+        val=$(pass show "$key") || { echo "load-secrets: failed to read $key" >&2; return 1; }
+        export "$var=$val"
+        echo "exported $var"
+    done
+}
+
+# Machine-local extras (uncommitted). Sourced last so it can override.
 [ -f "$HOME/.secrets" ] && source "$HOME/.secrets"
 
 # Language options
