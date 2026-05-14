@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(claude:*)",
+      "Bash(todo add:*)",
+      "Bash(find /home/micah/.claude/plugins -type d -name *db*)",
+      "Bash(find /home/micah/.grove -name *.md)",
+      "Bash(find /home/micah/.grove-src -name *.md)",
+      "Bash(find /home/micah/projects -path */skills/*db* -type f)",
+      "Bash(find /home/micah -path *skill* -name *.md)",
+      "Bash(find /home/micah/.claude/plugins -name *.md)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

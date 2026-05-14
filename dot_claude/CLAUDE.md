@@ -1,0 +1,8 @@
+Your in a Windows Subsystem for Linux (WSL) environment.
+
+- NEVER use emdashes or double dashes in writing.
+- Always use glab cli when presented with gitlab urls or tasks.
+- Use `pbcopy` for copying to clipboard (shell function wrapping `clip.exe` on WSL)
+- **Open URLs in Edge**: Use `xdg-open '<url>'` for http/https URLs (configured via `~/.local/share/applications/wsl-browser.desktop`).
+- **Open local files in Windows default app** (HTML, PDF, images, etc.): `cd /mnt/c && cmd.exe /c start "" "$(wslpath -w '<linux-path>')"`. Required because cmd.exe/explorer.exe reject UNC paths (`\\wsl.localhost\...`) as cwd — switching to `/mnt/c` first avoids the "UNC paths are not supported" error. The empty `""` after `start` is the window title placeholder. Do NOT use `xdg-open` for local files — it does not route them to Windows browsers.
+
