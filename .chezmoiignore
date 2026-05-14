@@ -1,0 +1,4 @@
+{{- if not .is_macos }}
+.ssh
+.ssh/**
+{{- end }}
