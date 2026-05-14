@@ -73,6 +73,11 @@ Chezmoi prefixes used:
 - `skills/psql-query/`: UDL Postgres
 - `skills/writing-requirements-workspace/`: eval workspace with cerberus/Bluestaq content
 
+### Symlinked / broken skills (excluded)
+
+- `skills/fix-mr-comments-local`: broken symlink (target project no longer exists). Dropped from both dotfiles and the live `~/.claude/skills/` during cleanup.
+- `skills/todo`: intact symlink to `~/projects/mi-todos/skill`. User dropped this skill from their workflow; excluded from dotfiles.
+
 ### Other agents/commands (excluded)
 
 - `agents/jira-writer.md`: user opted to drop after sweep
@@ -123,7 +128,7 @@ The repo's existing `bootstrap/linux.sh` and `bootstrap/macos.sh` already run `c
 
 - Global CLAUDE.md guidance
 - Notify toasts wired up (tmux-aware label per earlier work)
-- 8 user-authored skills available
+- 6 user-authored skills available
 - 1 user-authored slash command available
 - Official-marketplace plugins enabled and ready to install on first Claude run
 
@@ -142,9 +147,8 @@ Removing one from tracking: `chezmoi forget ~/.claude/skills/<name>` (leaves on-
 ## Known caveats / follow-ups (not blocking)
 
 1. **Bluestaq/UDL references inside kept skills.** `mr-queue`, `review-tests`, and `writing-requirements` each contain inline references to Bluestaq standards and conventions. User explicitly chose to keep them as-is. Sanitizing those into generic-language skills is a separate effort.
-2. **`fix-mr-comments-local`** is in the skill listing inside `~/.claude/skills/` but is not surfaced in the active-skills listing in this Claude session, which suggests it may be experimental or unfinished. Included anyway since the user authored it; remove later if stale.
-3. **Plugin enablement is not the same as plugin installation.** On a fresh machine, the `enabledPlugins` entries record the user's preference, but the actual plugin code is fetched by Claude Code from the official marketplace on first run. Expect a small first-launch delay while plugins install.
-4. **`hooks/branch-context-env.sh` and `hooks/ssh-agent-env.sh`** are shell-env helpers that don't appear referenced by any current `settings.json` hook. They are included on the assumption they're sourced by some external mechanism (e.g., the user's zshrc or a tmux hook). If after migration they turn out to be unreferenced anywhere, they can be dropped from the seed in a follow-up.
+2. **Plugin enablement is not the same as plugin installation.** On a fresh machine, the `enabledPlugins` entries record the user's preference, but the actual plugin code is fetched by Claude Code from the official marketplace on first run. Expect a small first-launch delay while plugins install.
+3. **`hooks/branch-context-env.sh` and `hooks/ssh-agent-env.sh`** are shell-env helpers that don't appear referenced by any current `settings.json` hook. They are included on the assumption they're sourced by some external mechanism (e.g., the user's zshrc or a tmux hook). If after migration they turn out to be unreferenced anywhere, they can be dropped from the seed in a follow-up.
 
 ## Approval gate
 
