@@ -74,6 +74,13 @@ if [ -d "$HOME/.fzf/bin" ]; then
   source <(fzf --zsh)
 fi
 
+# GPG TTY for pinentry-curses. Must be set before sourcing .secrets,
+# which calls `pass show`. Without GPG_TTY, pinentry-curses can't find
+# a terminal and hangs on first decrypt after reboot until Ctrl+C.
+if [[ -t 0 ]]; then
+    export GPG_TTY=$(tty)
+fi
+
 # Load secrets (API keys, credentials, etc.)
 [ -f "$HOME/.secrets" ] && source "$HOME/.secrets"
 
@@ -81,3 +88,7 @@ fi
 export NODE_OPTIONS="--max-old-space-size=4096"
 export CLAUDE_CODE_NO_FLICKER=1
 
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
