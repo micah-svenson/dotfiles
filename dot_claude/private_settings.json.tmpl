@@ -25,6 +25,20 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "{{ .chezmoi.homeDir }}/.claude/hooks/tmux_registry.py register", "timeout": 5 }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "{{ .chezmoi.homeDir }}/.claude/hooks/tmux_registry.py unregister", "timeout": 5 }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -36,7 +50,13 @@
     "ralph-loop@claude-plugins-official": false,
     "playwright@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": true,
+    "jira@bluestaq": true,
+    "like-micah@like-micah": true,
+    "briskly@briskly": true,
+    "loom@loom": true,
+    "jira-diode@jira-diode": true,
+    "team-standards@bluestaq": true
   },
   "spinnerVerbs": {
     "mode": "replace",
