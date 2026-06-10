@@ -109,7 +109,9 @@ def live_sessions() -> set:
     try:
         out = subprocess.run(["tmux", "list-sessions", "-F", "#{session_name}"],
                              capture_output=True, text=True, check=True).stdout
-        return set(out.split())
+        # One name per line; split on lines (not whitespace) so names with
+        # spaces survive.
+        return {line for line in out.splitlines() if line}
     except subprocess.CalledProcessError:
         return set()  # no tmux server running yet
 
@@ -129,36 +131,49 @@ def main(argv: list[str]) -> int:
     for name, reason in skipped:
         print(f"skip {name}: {reason}", file=sys.stderr)
 
+    restored = []
     for action in actions:
-        for cmd in commands_for(action):
-            if dry:
+        if dry:
+            for cmd in commands_for(action):
                 print(" ".join(cmd))
-            else:
+            continue
+        # One failed restore must not abort the rest.
+        try:
+            for cmd in commands_for(action):
                 subprocess.run(cmd, check=True)
-        if not dry:
-            print(f"restored {action['tmux_name']} -> claude --resume {action['session_id']}",
-                  file=sys.stderr)
+        except subprocess.CalledProcessError as e:
+            print(f"failed to restore {action['tmux_name']}: {e}", file=sys.stderr)
+            continue
+        restored.append(action)
+        print(f"restored {action['tmux_name']} -> claude --resume {action['session_id']}",
+              file=sys.stderr)
 
     if dry:
         return 0
 
     # Compact the registry: keep rows we just restored + rows for sessions that
     # were already live. Re-load under lock so concurrent SessionStart upserts
-    # from the resumed Claudes are preserved.
-    restored_ids = {a["session_id"] for a in actions}
+    # from the resumed Claudes are preserved. (keep_live_ids is computed from the
+    # pre-restore snapshot; a session that runs /clear or /compact mid-restore
+    # gets a new UUID that is dropped here but re-added by its next SessionStart,
+    # so no conversation is lost.)
+    restored_ids = {a["session_id"] for a in restored}
     keep_live_ids = {sid for sid, row in reg.items()
                      if row.get("tmux_name") in live_before}
     kept = restored_ids | keep_live_ids
     with locked(REGISTRY_PATH):
         atomic_write(REGISTRY_PATH, compact(load(REGISTRY_PATH), kept))
 
-    # Auto-attach.
+    # Auto-attach: prefer a just-restored session, else fall back to an existing
+    # one (announced, so a no-op restore isn't a silent jump).
     target = attach_arg
     if target is None:
-        if actions:
-            target = actions[0]["tmux_name"]
+        if restored:
+            target = restored[0]["tmux_name"]
         elif live_before:
             target = sorted(live_before)[0]
+            print(f"no sessions restored; attaching to existing session {target}",
+                  file=sys.stderr)
     if target:
         if os.environ.get("TMUX"):
             subprocess.run(["tmux", "switch-client", "-t", target])
