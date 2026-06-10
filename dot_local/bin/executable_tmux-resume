@@ -2,8 +2,8 @@
 """Recreate tmux sessions and resume their Claude conversations after a reboot.
 
 Reads ~/.claude/tmux-session-registry.json, rebuilds one tmux session per
-recorded name (main-window Claude only), runs `claude --resume <id>`, attaches,
-then compacts the registry to the restored + still-live set.
+recorded name (main-window Claude only), runs `<LAUNCH_CMD> --resume <id>`,
+attaches, then compacts the registry to the restored + still-live set.
 
 Usage: tmux-resume [--dry-run] [session-name-to-attach]
 """
@@ -19,7 +19,11 @@ import sys
 HOME = os.path.expanduser("~")
 REGISTRY_PATH = os.path.join(HOME, ".claude", "tmux-session-registry.json")
 PROJECTS_DIR = os.path.join(HOME, ".claude", "projects")
-LAUNCH_CMD = "claude"  # override here if you launch Claude via a wrapper
+# Launch command for resumed sessions. `tmux send-keys` types this into the
+# interactive pane, so a shell alias expands here. `cldyo` is the user's alias for
+# `claude --dangerously-skip-permissions --model 'opus[1m]'`. On a machine where
+# that alias is not defined, set this to `claude` or the expanded command.
+LAUNCH_CMD = "cldyo"
 
 
 def load(path: str) -> dict:
