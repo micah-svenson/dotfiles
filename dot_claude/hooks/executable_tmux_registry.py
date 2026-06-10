@@ -76,6 +76,17 @@ def remove(reg: dict, session_id: str) -> dict:
     return out
 
 
+# SessionEnd `reason` values that mean the USER intentionally ended the
+# conversation, so its row should be forgotten. Any other reason keeps the row.
+# In particular "other" — which a tmux kill / terminal close / reboot produces
+# (verified empirically) — KEEPS the row so it can be restored after a reboot.
+USER_EXIT_REASONS = frozenset({"prompt_input_exit", "logout", "clear"})
+
+
+def should_forget(reason) -> bool:
+    return reason in USER_EXIT_REASONS
+
+
 def rename(reg: dict, tmux_session_id: str, new_name: str) -> dict:
     out = {}
     for sid, row in reg.items():
@@ -110,15 +121,6 @@ def session_id_for_name(name: str) -> str | None:
         return None
 
 
-def _read_stdin_session_id() -> str | None:
-    try:
-        payload = json.load(sys.stdin)
-    except (json.JSONDecodeError, ValueError):
-        return None
-    sid = payload.get("session_id")
-    return sid if isinstance(sid, str) and sid else None
-
-
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
         return 0
@@ -135,11 +137,20 @@ def main(argv: list[str]) -> int:
             atomic_write(REGISTRY_PATH, rename(load(REGISTRY_PATH), sid, new_name))
         return 0
 
-    session_id = _read_stdin_session_id()
-    if not session_id:
+    try:
+        payload = json.load(sys.stdin)
+    except (json.JSONDecodeError, ValueError):
+        payload = {}
+    session_id = payload.get("session_id")
+    if not isinstance(session_id, str) or not session_id:
         return 0
 
     if mode == "unregister":
+        # Only forget the session on a genuine user exit. Signal termination
+        # (reason "other" — tmux kill / terminal close / reboot) KEEPS the row
+        # so it can be restored later.
+        if not should_forget(payload.get("reason")):
+            return 0
         with locked(REGISTRY_PATH):
             atomic_write(REGISTRY_PATH, remove(load(REGISTRY_PATH), session_id))
         return 0
