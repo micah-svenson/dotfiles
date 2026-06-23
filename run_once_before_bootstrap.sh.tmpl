@@ -10,7 +10,7 @@ SCRIPT_DIR="{{ .chezmoi.sourceDir }}"
 {{ if eq .chezmoi.os "darwin" -}}
 # macOS
 echo "🍎 Detected macOS - running macOS bootstrap..."
-bash "$SCRIPT_DIR/bootstrap/macos.sh"
+IS_WORK={{ if .is_work }}1{{ else }}0{{ end }} bash "$SCRIPT_DIR/bootstrap/macos.sh"
 {{ else if eq .chezmoi.os "linux" -}}
 # Linux
 echo "🐧 Detected Linux - running Linux bootstrap..."

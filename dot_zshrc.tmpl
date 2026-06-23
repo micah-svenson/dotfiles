@@ -16,7 +16,7 @@ ZSH_THEME="candy" # set by `omz`
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git notes)
+plugins=(git{{ if not .is_work }} notes{{ end }})
 
 # Setup omz.
 source $ZSH/oh-my-zsh.sh
@@ -26,7 +26,7 @@ if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-{{- if .is_macos }}
+{{- if and .is_macos (not .is_work) }}
 # macOS specific aliases and settings
 
 # PlutoBot — SSH into dedicated bot account
@@ -59,8 +59,11 @@ fi
 
 ## CUSTOM CONFIG ##
 
-# Persistent SSH agent (systemd user service)
+{{- if not .is_macos }}
+# Persistent SSH agent (systemd user service). macOS provides its own
+# ssh-agent via launchd, so SSH_AUTH_SOCK is left untouched there.
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
+{{- end }}
 
 # Setup Node Version Manager
 export NVM_DIR="$HOME/.nvm"
@@ -80,28 +83,39 @@ if [[ -t 0 ]]; then
     export GPG_TTY=$(tty)
 fi
 
-# On-demand secrets. Two entry points:
-#   unlock-secrets   warms gpg-agent cache (one passphrase prompt unlocks
-#                    all). After this, `pass show <key>` is silent and
-#                    instant for the cache TTL. Nothing exported to env.
+{{- if .is_work }}
+# On-demand work secrets. Two entry points:
+#   unlock-secrets   reads each secret once so the backend prompts/caches
+#                    up front. Nothing exported to env.
 #   load-secrets     also exports each secret as an env var. Use only
 #                    when a child process needs to read them from env
 #                    (e.g. opencode reading OPENAI_API_KEY).
 #
-# Pass keys to fetch. To add a new secret, append "VAR_NAME=pass/path".
+# Backend: macOS Keychain on Mac, `pass` on Linux/WSL.
+#   Add on Linux:  pass insert credentials/<name>
+#   Add on Mac:    security add-generic-password -s "credentials/<name>" -a "$USER" -w
+# Then append "VAR_NAME=credentials/<name>" to the list below.
 _SECRETS=(
     "JIRA_PAT=credentials/jira-pat"
     "OPENAI_API_KEY=credentials/openai-api-key"
     "SONARQUBE_TOKEN=credentials/sonarqube-token"
 )
 
+{{- if .is_macos }}
+# macOS Keychain backend (service name == the credentials/<name> key)
+_secret_get() { security find-generic-password -s "$1" -w 2>/dev/null; }
+{{- else }}
+# pass / gpg-agent backend
+_secret_get() { pass show "$1"; }
+{{- end }}
+
 unlock-secrets() {
     local entry key
     for entry in "${_SECRETS[@]}"; do
         key="${entry#*=}"
-        pass show "$key" >/dev/null || { echo "unlock-secrets: failed on $key" >&2; return 1; }
+        _secret_get "$key" >/dev/null || { echo "unlock-secrets: failed on $key" >&2; return 1; }
     done
-    echo "unlocked ${#_SECRETS[@]} secrets in gpg-agent cache"
+    echo "unlocked ${#_SECRETS[@]} secrets"
 }
 
 load-secrets() {
@@ -109,11 +123,12 @@ load-secrets() {
     for entry in "${_SECRETS[@]}"; do
         var="${entry%%=*}"
         key="${entry#*=}"
-        val=$(pass show "$key") || { echo "load-secrets: failed to read $key" >&2; return 1; }
+        val=$(_secret_get "$key") || { echo "load-secrets: failed to read $key" >&2; return 1; }
         export "$var=$val"
         echo "exported $var"
     done
 }
+{{- end }}
 
 # Machine-local extras (uncommitted). Sourced last so it can override.
 [ -f "$HOME/.secrets" ] && source "$HOME/.secrets"

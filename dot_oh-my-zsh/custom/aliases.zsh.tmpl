@@ -213,11 +213,14 @@ function gl-issue {
 
 # ── OpenCode ────────────────────────────────────────────────────────
 alias oc="opencode"
+{{ if .is_work -}}
+# Work model profiles (Bedrock / OpenAI) — only on work machines
 alias oco="opencode -m amazon-bedrock/micah-opus-4-6"
 alias ocs="opencode -m amazon-bedrock/micah-sonnet-4-6"
 alias och="opencode -m amazon-bedrock/micah-haiku-4-5"
 alias ocg="opencode -m openai/gpt-5.4"
 alias ocgm="opencode -m openai/gpt-5.4-mini"
+{{ end -}}
 
 # ── Claude Code ─────────────────────────────────────────────────────
 alias cld="claude "

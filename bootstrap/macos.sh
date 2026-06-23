@@ -35,15 +35,25 @@ brew install --formula \
 # Install GUI applications
 echo "🖥️  Installing GUI applications..."
 # Using || true to ignore failures for casks that may already be installed
-brew install --cask \
-  iterm2 \
-  visual-studio-code \
-  cursor \
-  obsidian \
-  bitwarden \
-  karabiner-elements \
-  google-chrome \
-  || true
+
+# Casks installed on every Mac (work and personal)
+CASKS=(
+  iterm2
+  visual-studio-code
+)
+
+# Personal-only casks (skipped on work machines via IS_WORK=1)
+if [ "${IS_WORK:-0}" != "1" ]; then
+  CASKS+=(
+    cursor
+    obsidian
+    bitwarden
+    karabiner-elements
+    google-chrome
+  )
+fi
+
+brew install --cask "${CASKS[@]}" || true
 
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
