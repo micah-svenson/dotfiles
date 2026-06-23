@@ -1,4 +1,12 @@
-{{- if not .is_macos }}
+{{- if or (not .is_macos) .is_work }}
 .ssh
 .ssh/**
 {{- end }}
+{{- if .is_work }}
+Library/LaunchAgents/com.micahsvenson.obsidian-sync.plist
+.oh-my-zsh/custom/plugins/notes
+.oh-my-zsh/custom/plugins/notes/**
+{{- end }}
+
+# Claude's per-machine local overrides are not managed by chezmoi
+.claude/settings.local.json

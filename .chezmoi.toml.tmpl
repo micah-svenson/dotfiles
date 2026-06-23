@@ -1,5 +1,9 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
-{{- $notes_dir := promptStringOnce . "notes_dir" "Notes directory (e.g. ~/Projects/notes)" -}}
+{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine? (strips personal aliases, notes, Obsidian sync, PlutoBot)" -}}
+{{- $notes_dir := "" -}}
+{{- if not $is_work -}}
+{{-   $notes_dir = promptStringOnce . "notes_dir" "Notes directory (e.g. ~/Projects/notes)" -}}
+{{- end -}}
 {{- $windows_username := "" -}}
 {{- $is_wsl := or (env "WSL_DISTRO_NAME") (and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease | lower)) -}}
 {{- if $is_wsl -}}
@@ -8,6 +12,7 @@
 
 [data]
 email = {{ $email | quote }}
+is_work = {{ $is_work }}
 notes_dir = {{ $notes_dir | quote }}
 {{- if $is_wsl }}
 windows_username = {{ $windows_username | quote }}
