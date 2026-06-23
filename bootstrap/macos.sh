@@ -23,7 +23,6 @@ brew install --formula \
   fzf \
   git-delta \
   neovim \
-  zsh \
   curl \
   wget \
   jq \
