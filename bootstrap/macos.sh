@@ -31,6 +31,13 @@ brew install --formula \
   tmux \
   gh
 
+# Work-only CLI tools (skipped on personal machines)
+if [ "${IS_WORK:-0}" = "1" ]; then
+  echo "🔧 Installing work tools..."
+  brew install --formula \
+    glab        # GitLab CLI — primary remote host at work
+fi
+
 # Install GUI applications
 echo "🖥️  Installing GUI applications..."
 # Using || true to ignore failures for casks that may already be installed

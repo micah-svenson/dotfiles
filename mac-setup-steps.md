@@ -64,6 +64,9 @@ Steps I too to setup my Mac
   - `brew install --cask openscad@snapshot`
 - Install chezmoi ( dotfile manager)
   - `brew install chezmoi`
+- glab (GitLab CLI) — work machines only
+  - `brew install glab` (handled by bootstrap when `is_work=true`)
+  - Authenticate: `glab auth login` (for self-hosted work GitLab, add `--hostname <gitlab-host>`)
 
 TODOS:
 
