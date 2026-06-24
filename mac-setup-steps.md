@@ -24,6 +24,9 @@ Steps I too to setup my Mac
 - Install iterm2 `brew install --cask iterm2` (handled by bootstrap)
   - In iTerm2: Preferences > General > Preferences > "Load preferences from a custom folder" → set to `~/.config/iterm2/`
   - Config tracked via chezmoi: `~/.config/iterm2/com.googlecode.iterm2.plist`
+- 0xProto Nerd Font (terminal font)
+  - Installed automatically by chezmoi → `~/Library/Fonts/` (tracked under `private_Library/private_Fonts/`)
+  - In iTerm2: Settings > Profiles > Text > Font → select **0xProto Nerd Font Mono** (Mono variant keeps cell alignment)
 - Install oh my zsh
   - `sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`
 - To remap the Caps Lock key to Escape on a Mac, you can do the following:
