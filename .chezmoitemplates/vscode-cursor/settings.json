@@ -218,5 +218,9 @@
     "filters": {
       "include": ["**/*IT.java", "**/*IntegrationTest.java"]
     }
-  }
+  },
+  "jupyter.interactiveWindow.creationMode": "perFile",
+  "claudeCode.preferredLocation": "panel",
+  "security.workspace.trust.untrustedFiles": "open",
+  "claudeCode.hideOnboarding": true
 }
