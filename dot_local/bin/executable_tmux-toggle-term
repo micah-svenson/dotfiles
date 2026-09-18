@@ -1,28 +1,48 @@
 #!/usr/bin/env bash
 # Toggle an IDE-like bottom terminal pane (persistent across toggles).
-# Works by breaking the pane into a hidden background window and restoring it.
+# Hides the pane in a detached background window, then restores it on demand.
 # Compatible with macOS and Linux.
+#
+# Usage: tmux-toggle-term [pane-id]
+# The key binding passes #{pane_id}, which run-shell expands.
+#
+# Note: the marker is a pane user option, not the pane title. A shell prompt
+# (oh-my-zsh termsupport) rewrites pane_title on every prompt, so a pane-title
+# marker does not survive and every toggle splits a new pane.
+# Note: run-shell sets TMUX but not TMUX_PANE, so the pane id arrives as $1.
+
+set -u
 
 TERM_NAME="_ide_term"
+MARKER="@ide_term"
+SIZE="30%"
 
-# Check for a hidden window containing our terminal
-hidden=$(tmux list-windows -F '#{window_id} #{window_name}' \
-  | awk -v n="$TERM_NAME" '$2==n {print $1; exit}')
+# Resolve the calling pane: argument, then environment, then current client.
+here="${1:-${TMUX_PANE:-}}"
+if [ -z "$here" ]; then
+    here=$(tmux display-message -p '#{pane_id}')
+fi
 
-if [ -n "$hidden" ]; then
-    # Terminal is hidden -> show it
-    tmux join-pane -v -l 30% -s "${hidden}.0"
+current_window=$(tmux display-message -p -t "$here" '#{window_id}')
+
+# Locate the marked pane anywhere in this session.
+marked=$(tmux list-panes -s -t "$here" -F "#{pane_id} #{window_id} #{$MARKER}" \
+  | awk '$3=="1" {print $1" "$2; exit}')
+
+if [ -z "$marked" ]; then
+    # No terminal exists. Create one and mark it.
+    new_pane=$(tmux split-window -v -l "$SIZE" -t "$here" -P -F '#{pane_id}')
+    tmux set-option -p -t "$new_pane" "$MARKER" 1
+    exit 0
+fi
+
+pane_id=${marked%% *}
+pane_window=${marked##* }
+
+if [ "$pane_window" = "$current_window" ]; then
+    # The terminal is visible here. Hide it in a detached window.
+    tmux break-pane -d -s "$pane_id" -n "$TERM_NAME"
 else
-    # Check if terminal pane is currently visible (by pane title marker)
-    visible=$(tmux list-panes -F '#{pane_id} #{pane_title}' \
-      | awk -v n="$TERM_NAME" '$2==n {print $1; exit}')
-
-    if [ -n "$visible" ]; then
-        # Terminal is visible -> hide it to a background window
-        tmux break-pane -d -s "$visible" -n "$TERM_NAME"
-    else
-        # No terminal exists -> create one and mark it
-        tmux split-window -v -l 30%
-        tmux select-pane -T "$TERM_NAME"
-    fi
+    # The terminal is hidden or sits in another window. Bring it here.
+    tmux join-pane -v -l "$SIZE" -s "$pane_id" -t "$here"
 fi
