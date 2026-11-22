@@ -19,7 +19,7 @@
 	<key>AiMaxTokens</key>
 	<integer>400000</integer>
 	<key>AiModel</key>
-	<string>gpt-5.1</string>
+	<string>gpt-5.2</string>
 	<key>AiResponseMaxTokens</key>
 	<integer>128000</integer>
 	<key>AitermURL</key>
@@ -2194,15 +2194,15 @@
 			<key>HotKey Alternate Shortcuts</key>
 			<array/>
 			<key>HotKey Characters</key>
-			<string></string>
+			<string>;</string>
 			<key>HotKey Characters Ignoring Modifiers</key>
-			<string>s</string>
+			<string>;</string>
 			<key>HotKey Key Code</key>
-			<integer>1</integer>
+			<integer>41</integer>
 			<key>HotKey Modifier Activation</key>
 			<integer>1</integer>
 			<key>HotKey Modifier Flags</key>
-			<integer>1310720</integer>
+			<integer>1048576</integer>
 			<key>HotKey Window Animates</key>
 			<false/>
 			<key>HotKey Window AutoHides</key>
