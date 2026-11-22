@@ -8,6 +8,11 @@ Library/LaunchAgents/com.micahsvenson.obsidian-sync.plist
 .oh-my-zsh/custom/plugins/notes/**
 {{- end }}
 
+{{- if not .is_wsl }}
+.claude/skills/rich-copy
+.claude/skills/rich-copy/**
+{{- end }}
+
 # Claude's per-machine local overrides are not managed by chezmoi
 .claude/settings.local.json
 
