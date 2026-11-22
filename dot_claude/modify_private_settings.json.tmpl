@@ -5,7 +5,8 @@
 # the assorted flags, and a SEED of the generic official-marketplace plugins.
 #
 # chezmoi deliberately does NOT own enabledPlugins/extraKnownMarketplaces beyond
-# seeding. Those two keys are PRESERVED from the live file so that
+# seeding, nor UI-toggled keys (model, effortLevel, modelSettings, theme, voice,
+# permissions, notif prefs): if those exist in the live file, live wins. Those two keys are PRESERVED from the live file so that
 # `claude plugin enable/disable` and pac-workspace's `bin/plugin-dev` can toggle
 # plugins globally without the next `chezmoi apply` reverting the change.
 #
@@ -85,4 +86,8 @@ printf '%s' "$base" | jq \
   --argjson live "$live" '
     .enabledPlugins = ((.enabledPlugins // {}) + ($live.enabledPlugins // {}))
     | .extraKnownMarketplaces = ($live.extraKnownMarketplaces // {})
+    # UI-toggled keys (/model, /effort, /theme, /voice, etc.): live wins if set
+    | . + ($live | with_entries(select(.key | IN(
+        "model", "effortLevel", "modelSettings", "theme", "voice",
+        "permissions", "preferredNotifChannel", "agentPushNotifEnabled"))))
   '

@@ -10,3 +10,13 @@ Library/LaunchAgents/com.micahsvenson.obsidian-sync.plist
 
 # Claude's per-machine local overrides are not managed by chezmoi
 .claude/settings.local.json
+
+# Repo-only files (not dotfiles)
+README.md
+mac-setup-steps.md
+bootstrap
+bootstrap/**
+docs
+docs/**
+projects
+projects/**
